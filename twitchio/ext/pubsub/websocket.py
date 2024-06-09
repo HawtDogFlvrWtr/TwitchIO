@@ -201,6 +201,11 @@ class PubSubWebsocket:
         self.client.run_event("pubsub_message", msg)  # generic one
         self.client.run_event("pubsub_channel_points", msg)
 
+    async def handle_community_redeem(self, message: dict):
+        msg = models.PubSubCommunityPointsMessage(self.client, message["data"])
+        self.client.run_event("pubsub_message", msg)  # generic one
+        self.client.run_event("pubsub_community_points", msg)
+
     async def handle_response(self, message: dict):
         if message["error"]:
             logger.error(f"Received errored response for nonce {message['nonce']}: {message['error']}")

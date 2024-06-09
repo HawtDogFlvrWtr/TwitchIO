@@ -37,6 +37,7 @@ __all__ = (
     "PubSubChatMessage",
     "PubSubBadgeEntitlement",
     "PubSubChannelPointsMessage",
+    "PubSubCommunityPointsMessage",
     "PubSubModerationAction",
     "PubSubModerationActionModeratorAdd",
     "PubSubModerationActionBanRequest",
@@ -232,6 +233,50 @@ class PubSubChannelPointsMessage(PubSubMessage):
         self.input: Optional[str] = redemption.get("user_input")
         self.status: str = redemption["status"]
 
+class PubSubCommunityPointsMessage(PubSubMessage):
+    """
+    A Community points redemption
+
+    Attributes
+    -----------
+    timestamp: :class:`datetime.datetime`
+        The timestamp the event happened.
+    channel_id: :class:`int`
+        The channel the reward was redeemed on.
+    id: :class:`str`
+        The id of the reward redemption.
+    user_id: :class:`int`
+        The user id redeeming the reward.
+    user_display_name: :class:`str`
+        The display anme of the user.
+    title: :class:`str`
+        The title of the community challenge.
+    amount: :class:`int`
+        The amount the user gave, if any.
+    stream_contribution: :class:`int`
+        The amount the user gave this stream, if any.    
+    total_contribution: :class:`int`
+        The amount the user gave in total, if any. 
+    status: :class:`str`
+        The status of the reward.
+    """
+
+    __slots__ = "timestamp", "channel_id", "user_id", "user_display_name", "id", "title", "amount", "stream_contribution", "total_contribution", "status"
+
+    def __init__(self, client: Client, topic: str, data: dict):
+        super().__init__(client, topic, data)
+        contribution = data["message"]["data"]["contribution"]
+
+        self.timestamp = parse_timestamp(data["message"]["data"]["timestamp"])
+        self.channel_id: int = int(contribution["channel_id"])
+        self.id: str = contribution["goal"]["id"]
+        self.user_id: int = contribution["user"]["id"]
+        self.user_display_name: str = contribution["user"]["display_name"]
+        self.title: str = contribution["goal"]["title"]
+        self.amount: int = int(contribution["amount"])
+        self.stream_contribution: int = int(contribution["stream_contribution"])
+        self.total_contribution: int = int(contribution["total_contribution"])
+        self.status: str = contribution["goal"]["status"]
 
 class PubSubModerationAction(PubSubMessage):
     """
@@ -494,6 +539,7 @@ _mapping = {
     "channel-subscribe-events-v1": ("pubsub_subscription", PubSubChannelSubscribe),
     "chat_moderator_actions": ("pubsub_moderation", _find_mod_action),
     "channel-points-channel-v1": ("pubsub_channel_points", PubSubChannelPointsMessage),
+    "community-points-channel-v1": ("pubsub_community_points", PubSubCommunityPointsMessage),
     "whispers": ("pubsub_whisper", None),
 }
 
