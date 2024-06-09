@@ -265,18 +265,21 @@ class PubSubCommunityPointsMessage(PubSubMessage):
 
     def __init__(self, client: Client, topic: str, data: dict):
         super().__init__(client, topic, data)
-        contribution = data["message"]["data"]["contribution"]
+        if "contribution" in data["message"]["data"]:
+            contribution = data["message"]["data"]["contribution"]
 
-        self.timestamp = parse_timestamp(data["message"]["data"]["timestamp"])
-        self.channel_id: int = int(contribution["channel_id"])
-        self.id: str = contribution["goal"]["id"]
-        self.user_id: int = contribution["user"]["id"]
-        self.user_display_name: str = contribution["user"]["display_name"]
-        self.title: str = contribution["goal"]["title"]
-        self.amount: int = int(contribution["amount"])
-        self.stream_contribution: int = int(contribution["stream_contribution"])
-        self.total_contribution: int = int(contribution["total_contribution"])
-        self.status: str = contribution["goal"]["status"]
+            self.timestamp = parse_timestamp(data["message"]["data"]["timestamp"])
+            self.channel_id: int = int(contribution["channel_id"])
+            self.id: str = contribution["goal"]["id"]
+            self.user_id: int = contribution["user"]["id"]
+            self.user_display_name: str = contribution["user"]["display_name"]
+            self.title: str = contribution["goal"]["title"]
+            self.amount: int = int(contribution["amount"])
+            self.stream_contribution: int = int(contribution["stream_contribution"])
+            self.total_contribution: int = int(contribution["total_contribution"])
+            self.status: str = contribution["goal"]["status"]
+        else:
+            return None
 
 class PubSubModerationAction(PubSubMessage):
     """
